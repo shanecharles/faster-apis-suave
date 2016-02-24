@@ -33,10 +33,15 @@ let updateBug b =
 
 let getOrUpdate b = choose [ GET  >=> okBug b
                              POST >=> updateBug b]
+let getBugsByStatus = function
+  | "open"    -> Db.GetOpenBugs ()
+  | "closed" -> Db.GetClosedBugs ()
+  | _        -> Db.GetAllBugs ()
 
 let app = 
   choose [ 
     GET  >=> path "/api/bugs" >=> jsonMime >=> getAllBugs 
     pathScan "/api/bugs/%d" (Db.GetBug >> ifFound getOrUpdate >> getOrElse bugNotFound) 
     POST >=> path "/api/bugs/create" >=> createBug 
-    POST >=> pathScan "/api/bugs/%d/close" (Db.GetBug >> ifFound closeBug >> getOrElse bugNotFound) ]
+    POST >=> pathScan "/api/bugs/%d/close" (Db.GetBug >> ifFound closeBug >> getOrElse bugNotFound)
+    GET  >=> pathScan "/api/bugs/%s" (getBugsByStatus >> serializeBugs) ]
