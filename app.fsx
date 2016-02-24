@@ -15,7 +15,8 @@ let jsonMime = Writers.setMimeType "application/json"
 let bugNotFound = RequestErrors.NOT_FOUND "No bug"
 let ifFound = Option.map
 let getOrElse = FSharpx.Option.getOrElse
-let hasDetails = FSharpx.Choice.choice
+let hasData = FSharpx.Choice.choice
+let noFilter = FSharpx.Functional.Prelude.konst ""
 
 type JsonBugFormat = { Id : int; Details : string; Closed : System.Nullable<System.DateTime> }
 let toJbug (bug : Bug) = { Id = bug.Id; Details = bug.Details; Closed = (Option.toNullable bug.Closed) }
@@ -25,11 +26,11 @@ let okBug b = jsonMime >=> OK (b |> toJbug |> JsonConvert.SerializeObject)
 let getAllBugs = warbler (fun _ -> Db.GetAllBugs () |> serializeBugs)
 
 let createBug = 
-  request (fun r -> r.formData "details" |> hasDetails (Db.NewBug >> okBug) RequestErrors.BAD_REQUEST)
+  request (fun r -> r.formData "details" |> hasData (Db.NewBug >> okBug) RequestErrors.BAD_REQUEST)
 
 let closeBug b = Db.UpdateBug { b with Closed = Some System.DateTime.UtcNow } |> okBug
 let updateBug b = 
-  request (fun r -> r.formData "details" |> hasDetails (fun d -> Db.UpdateBug { b with Details = d } |> okBug) RequestErrors.BAD_REQUEST)
+  request (fun r -> r.formData "details" |> hasData (fun d -> Db.UpdateBug { b with Details = d } |> okBug) RequestErrors.BAD_REQUEST)
 
 let getOrUpdate b = choose [ GET  >=> okBug b
                              POST >=> updateBug b]
@@ -40,7 +41,7 @@ let filterStatus =
     | "closed" -> Db.GetClosedBugs ()
     | _        -> Db.GetAllBugs ()
   request (fun r -> r.queryParam "filter" 
-                    |> hasDetails id (FSharpx.Functional.Prelude.konst "")
+                    |> hasData id noFilter
                     |> getBugsByStatus
                     |> serializeBugs)
 
