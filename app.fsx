@@ -29,9 +29,13 @@ let createBug =
 
 let closeBug b = Db.UpdateBug { b with Closed = Some System.DateTime.UtcNow } |> okBug
 
+let updateBug b = 
+  request (fun r -> r.formData "details" |> hasDetails (fun d -> Db.UpdateBug { b with Details = d } |> okBug) RequestErrors.BAD_REQUEST)
+
 let app = 
   choose [ 
     GET  >=> path "/api/bugs" >=> jsonMime >=> getAllBugs 
     GET  >=> pathScan "/api/bugs/%d" (Db.GetBug >> ifFound okBug >> getOrElse bugNotFound) 
     POST >=> path "/api/bugs/create" >=> createBug 
-    POST >=> pathScan "/api/bugs/%d/close" (Db.GetBug >> ifFound closeBug >> getOrElse bugNotFound) ]
+    POST >=> pathScan "/api/bugs/%d/close" (Db.GetBug >> ifFound closeBug >> getOrElse bugNotFound) 
+    POST >=> pathScan "/api/bugs/%d" (Db.GetBug >> ifFound updateBug >> getOrElse bugNotFound) ]
