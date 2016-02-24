@@ -41,4 +41,4 @@ let create d = postReq (baseUri + "/api/bugs/create") (details d)
 let close id = postReq (sprintf "%s/api/bugs/%d/close" baseUri id) ""
 let update id d = postReq (sprintf "%s/api/bugs/%d" baseUri id) (details d)
 let get id = getReq (sprintf "%s/api/bugs/%d" baseUri id)
-let getStatus s = getReq (sprintf "%s/api/bugs/%s" baseUri s)
+let getStatus s = getReq (sprintf "%s/api/bugs?filter=%s" baseUri s)
