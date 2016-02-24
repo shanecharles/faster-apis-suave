@@ -38,10 +38,14 @@ let getBugsByStatus = function
   | "closed" -> Db.GetClosedBugs ()
   | _        -> Db.GetAllBugs ()
 
+let filterReq = request (fun r -> r.queryParam "filter" 
+                                    |> hasDetails id (FSharpx.Functional.Prelude.konst "")
+                                    |> getBugsByStatus
+                                    |> serializeBugs)
+
 let app = 
   choose [ 
-    GET  >=> path "/api/bugs" >=> jsonMime >=> getAllBugs 
+    GET  >=> path "/api/bugs" >=> jsonMime >=> filterReq
     pathScan "/api/bugs/%d" (Db.GetBug >> ifFound getOrUpdate >> getOrElse bugNotFound) 
     POST >=> path "/api/bugs/create" >=> createBug 
-    POST >=> pathScan "/api/bugs/%d/close" (Db.GetBug >> ifFound closeBug >> getOrElse bugNotFound)
-    GET  >=> pathScan "/api/bugs/%s" (getBugsByStatus >> serializeBugs) ]
+    POST >=> pathScan "/api/bugs/%d/close" (Db.GetBug >> ifFound closeBug >> getOrElse bugNotFound) ]
