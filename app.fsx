@@ -34,7 +34,6 @@ let updateBug b =
 
 let getOrUpdate b = choose [ GET  >=> okBug b
                              POST >=> updateBug b]
-
 let filterStatus = 
   let getBugsByStatus = function 
     | "open"   -> Db.GetOpenBugs ()
@@ -47,6 +46,7 @@ let filterStatus =
 
 let app = 
   choose [ 
+    GET  >=> path "/" >=> OK "<html><head><title>Simple Bugs</title></head><body><h2>Simple (not for production) Bug API in Suave</h2></body></html>"
     GET  >=> path "/api/bugs" >=> jsonMime >=> filterStatus
     pathScan "/api/bugs/%d" (Db.GetBug >> ifFound getOrUpdate >> getOrElse bugNotFound) 
     POST >=> path "/api/bugs/create" >=> createBug 
