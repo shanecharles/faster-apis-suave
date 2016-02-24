@@ -1,0 +1,17 @@
+NUGET
+  remote: https://www.nuget.org/api/v2
+  specs:
+    FAKE (4.20.0)
+    FSharp.Compiler.Service (2.0.0.6)
+    FSharp.Control.AsyncSeq (2.0.3)
+    FSharp.Core (4.0.0.1)
+    FSharpx.Async (1.12.0)
+      FSharp.Control.AsyncSeq
+    FSharpx.Collections (1.14.0)
+      FSharp.Core (>= 3.0.0)
+    FSharpx.Extras (1.10.3)
+      FSharpx.Async (>= 1.12)
+      FSharpx.Collections (>= 1.10.1)
+    Newtonsoft.Json (8.0.2)
+    Suave (1.1.1)
+      FSharp.Core (>= 3.1.2.5)
