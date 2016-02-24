@@ -1,4 +1,5 @@
 #r "packages/Suave/lib/net40/Suave.dll"
+#r "packages/fsharpx.extras/lib/40/fsharpx.extras.dll"
 #r "packages/NewtonSoft.Json/lib/net45/newtonsoft.json.dll"
 #load "db.fsx"
 
@@ -11,11 +12,17 @@ open BugDb.Models
 open Newtonsoft.Json
 
 let jsonMime = Writers.setMimeType "application/json"
+let bugNotFound = RequestErrors.NOT_FOUND "No bug"
+let ifFound = Option.map
+let getOrElse = FSharpx.Option.getOrElse
 
 type JsonBugFormat = { Id : int; Details : string; Closed : System.Nullable<System.DateTime> }
 let toJbug (bug : Bug) = { Id = bug.Id; Details = bug.Details; Closed = (Option.toNullable bug.Closed) }
 let serializeBugs = Seq.map toJbug >> JsonConvert.SerializeObject >> OK
 
+let okBug b = jsonMime >=> OK (b |> toJbug |> JsonConvert.SerializeObject)
 let getAllBugs = warbler (fun _ -> Db.GetAllBugs () |> serializeBugs)
 
-let app = GET >=> path "/api/bugs" >=> jsonMime >=> getAllBugs
+let app = choose [ 
+            GET >=> path "/api/bugs" >=> jsonMime >=> getAllBugs 
+            GET  >=> pathScan "/api/bugs/%d" (Db.GetBug >> ifFound okBug >> getOrElse bugNotFound) ]
