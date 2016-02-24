@@ -27,7 +27,11 @@ let getAllBugs = warbler (fun _ -> Db.GetAllBugs () |> serializeBugs)
 let createBug = 
   request (fun r -> r.formData "details" |> hasDetails (Db.NewBug >> okBug) RequestErrors.BAD_REQUEST)
 
-let app = choose [ 
-            GET  >=> path "/api/bugs" >=> jsonMime >=> getAllBugs 
-            GET  >=> pathScan "/api/bugs/%d" (Db.GetBug >> ifFound okBug >> getOrElse bugNotFound) 
-            POST >=> path "/api/bugs/create" >=> createBug ]
+let closeBug b = Db.UpdateBug { b with Closed = Some System.DateTime.UtcNow } |> okBug
+
+let app = 
+  choose [ 
+    GET  >=> path "/api/bugs" >=> jsonMime >=> getAllBugs 
+    GET  >=> pathScan "/api/bugs/%d" (Db.GetBug >> ifFound okBug >> getOrElse bugNotFound) 
+    POST >=> path "/api/bugs/create" >=> createBug 
+    POST >=> pathScan "/api/bugs/%d/close" (Db.GetBug >> ifFound closeBug >> getOrElse bugNotFound) ]
