@@ -48,4 +48,5 @@ let app =
     GET  >=> path "/api/bugs" >=> jsonMime >=> filterStatus
     pathScan "/api/bugs/%d" (Db.GetBug >> ifFound getOrUpdate >> getOrElse bugNotFound) 
     POST >=> path "/api/bugs/create" >=> createBug 
-    POST >=> pathScan "/api/bugs/%d/close" (Db.GetBug >> ifFound closeBug >> getOrElse bugNotFound) ]
+    POST >=> pathScan "/api/bugs/%d/close" (Db.GetBug >> ifFound closeBug >> getOrElse bugNotFound) 
+    RequestErrors.NOT_FOUND "Resource could not be found" ]
