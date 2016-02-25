@@ -41,7 +41,6 @@ let filterStatus =
                     |> hasData id noFilter
                     |> getBugsByStatus
                     |> serializeBugs)
-
 let app = 
   choose [ 
     GET  >=> path "/" >=> OK "<html><head><title>Simple Bugs</title></head><body><h2>Simple (not for production) Bug API in Suave</h2></body></html>"
