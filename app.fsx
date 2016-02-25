@@ -21,9 +21,7 @@ let noFilter = FSharpx.Functional.Prelude.konst ""
 type JsonBugFormat = { Id : int; Details : string; Closed : System.Nullable<System.DateTime> }
 let toJbug (bug : Bug) = { Id = bug.Id; Details = bug.Details; Closed = (Option.toNullable bug.Closed) }
 let serializeBugs = Seq.map toJbug >> JsonConvert.SerializeObject >> OK
-
 let okBug b = jsonMime >=> OK (b |> toJbug |> JsonConvert.SerializeObject)
-let getAllBugs = warbler (fun _ -> Db.GetAllBugs () |> serializeBugs)
 
 let createBug = 
   request (fun r -> r.formData "details" |> hasData (Db.NewBug >> okBug) RequestErrors.BAD_REQUEST)
