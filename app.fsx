@@ -43,7 +43,7 @@ let filterStatus =
                     |> serializeBugs)
 let app = 
   choose [ 
-    GET  >=> path "/" >=> OK "<html><head><title>Simple Bugs</title></head><body><h2>Simple (not for production) Bug API in Suave</h2></body></html>"
+    GET  >=> path "/" >=> OK "<html><head><title>Simple Bugs</title></head><body><h2>Winnipeg .Net Simple (not for production) Bug API in Suave</h2></body></html>"
     GET  >=> path "/api/bugs" >=> jsonMime >=> filterStatus
     pathScan "/api/bugs/%d" (Db.GetBug >> ifFound getOrUpdate >> getOrElse bugNotFound) 
     POST >=> path "/api/bugs/create" >=> createBug 
